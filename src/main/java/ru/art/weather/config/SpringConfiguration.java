@@ -45,7 +45,7 @@ public class SpringConfiguration implements WebMvcConfigurer {
     public SpringResourceTemplateResolver templateResolver() {
         SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
         templateResolver.setApplicationContext(applicationContext);
-        templateResolver.setPrefix("/WEB-INF/views/");
+        templateResolver.setPrefix("/");
         templateResolver.setSuffix(".html");
         logger.info("Template resolver configured.");
         return templateResolver;
@@ -108,7 +108,5 @@ public class SpringConfiguration implements WebMvcConfigurer {
         transactionManager.setSessionFactory(sessionFactory);
         return transactionManager;
     }
-
-
 
 }
