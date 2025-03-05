@@ -76,6 +76,7 @@ public class SpringConfiguration implements WebMvcConfigurer {
         dataSource.setUsername("arttt");
         dataSource.setPassword("arttt");
         dataSource.setMaximumPoolSize(10);
+        logger.info("datasource configured.");
         return dataSource;
     }
 
@@ -91,7 +92,7 @@ public class SpringConfiguration implements WebMvcConfigurer {
     public LocalSessionFactoryBean sessionFactory() {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource());
-        sessionFactory.setPackagesToScan("ru.art.weather.entity"); // Укажите пакет с вашими Entity классами
+        sessionFactory.setPackagesToScan("ru.art.weather.model");
 
         Properties hibernateProperties = new Properties();
         hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
@@ -99,6 +100,7 @@ public class SpringConfiguration implements WebMvcConfigurer {
         hibernateProperties.setProperty("hibernate.format_sql", "true");
         sessionFactory.setHibernateProperties(hibernateProperties);
 
+        logger.info("Session factory configured.");
         return sessionFactory;
     }
 

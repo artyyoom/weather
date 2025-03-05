@@ -28,4 +28,4 @@ CREATE TABLE IF NOT EXISTS Sessions (
 
     FOREIGN KEY (UserId) REFERENCES Users(ID)
 );
---rollback DROP TABLE Locations
+--rollback DROP TABLE Sessions

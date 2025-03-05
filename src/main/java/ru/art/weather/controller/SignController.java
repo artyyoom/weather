@@ -1,30 +1,33 @@
 package ru.art.weather.controller;
 
-import ch.qos.logback.core.model.Model;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
-import ru.art.weather.dto.UserDto;
+import ru.art.weather.dto.LoginResponseDto;
+import ru.art.weather.dto.UserLoginDto;
 import ru.art.weather.service.SignService;
-import ru.art.weather.util.DataValidator;
 
 @Controller
 @RequiredArgsConstructor
 public class SignController {
     private final SignService signService;
-    private final DataValidator dataValidator;
 
-    @GetMapping("/sign-in")
-    public String signIn(@RequestBody UserDto userDto) {
+    @PostMapping("/login")
+    public String login(@RequestBody UserLoginDto userLoginDto, HttpServletRequest request, HttpServletResponse response) {
 
-        signService.signIn( );
+        LoginResponseDto loginDto = signService.login(userLoginDto, request);
+
+        Cookie cookie = new Cookie("userID", String.valueOf(loginDto.getSession().getId()));
+        response.addCookie(cookie);
 
         return "html/sign-in";
     }
 
-    @GetMapping("/sign-up")
+    @PostMapping("/sign-up")
     public String signUp() {
 
         signService.signUp();
