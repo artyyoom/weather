@@ -20,6 +20,7 @@ public class SignController {
     public String signIn(@RequestBody UserDto userDto) {
 
         signService.signIn( );
+        System.out.println();
 
         return "html/sign-in";
     }
