@@ -73,8 +73,8 @@ public class SpringConfiguration implements WebMvcConfigurer {
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setDriverClassName("org.postgresql.Driver");
         dataSource.setJdbcUrl("jdbc:postgresql://localhost:5432/weather");
-        dataSource.setUsername("arttt");
-        dataSource.setPassword("arttt");
+        dataSource.setUsername("");
+        dataSource.setPassword("");
         dataSource.setMaximumPoolSize(10);
         return dataSource;
     }
