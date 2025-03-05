@@ -22,9 +22,9 @@ public class Session {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "userId")
     private User userId;
 
-    @Column(name = "expires_at")
+    @Column(name = "expiresAt")
     private Date expiresAt;
 }
