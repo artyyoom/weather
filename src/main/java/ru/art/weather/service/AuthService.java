@@ -2,10 +2,14 @@ package ru.art.weather.service;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.art.weather.dto.RegistrationDto;
 import ru.art.weather.dto.UserLoginDto;
 import ru.art.weather.mapper.SessionMapper;
+import ru.art.weather.mapper.UserMapper;
 import ru.art.weather.model.Session;
 import ru.art.weather.model.User;
 import ru.art.weather.repository.SessionRepository;
@@ -20,13 +24,15 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
+    private final UserMapper userMapper;
     private final SessionMapper sessionMapper;
 
     public void login(UserLoginDto userLoginDto, String userId, HttpServletResponse response) {
+
         Optional<User> userOptional = userRepository.findByName(userLoginDto.getLogin());
         User user = userOptional.orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (userId == null) {
+        if (userId.isEmpty()) {
             Session session = createSession(user);
             Cookie cookie = new Cookie("userID", session.getId().toString());
             response.addCookie(cookie);
@@ -43,19 +49,11 @@ public class AuthService {
         return sessionRepository.create(session);
     }
 
+    public void registration(RegistrationDto registrationDto) {
+        userRepository.create(createUser(registrationDto));
+    }
 
-
-//    private String extractCookie(HttpServletRequest request, String name) {
-//        Cookie[] cookies = request.getCookies();
-//        if (cookies != null) {
-//            for (Cookie cookie : cookies) {
-//                if (cookie.getName().equals(name)) {
-//                    return cookie.getValue();
-//                }
-//            }
-//        }
-//        return null;
-//    }
-
-    public void signUp() {}
+    private User createUser(RegistrationDto registrationDto) {
+        return userMapper.toEntity(registrationDto);
+    }
 }

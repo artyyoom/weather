@@ -5,9 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.art.weather.dto.SessionResponseDto;
 import ru.art.weather.model.Session;
 
-@Mapper
-@Component
+@Mapper(componentModel = "spring")
 public interface SessionMapper {
-
     SessionResponseDto toDto(Session session);
 }
