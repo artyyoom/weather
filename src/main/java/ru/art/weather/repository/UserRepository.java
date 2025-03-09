@@ -3,7 +3,6 @@ package ru.art.weather.repository;
 import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import ru.art.weather.model.User;
 
@@ -13,7 +12,7 @@ import java.util.Optional;
 public class UserRepository extends BaseRepository<Integer, User> {
 
     public UserRepository(SessionFactory sessionFactory) {
-        super(sessionFactory);
+        super(sessionFactory, User.class);
     }
 
     public Optional<User> findByName(String name) {

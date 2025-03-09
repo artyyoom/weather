@@ -1,43 +1,68 @@
 package ru.art.weather.repository;
 
+import jakarta.persistence.OptimisticLockException;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
-public class BaseRepository<ID, E> {
+public abstract class BaseRepository<ID, E> {
 
     protected final SessionFactory sessionFactory;
-    protected Class<E> clazz;
+    protected final Class<E> clazz;
 
-    public BaseRepository(SessionFactory sessionFactory) {
+    public BaseRepository(SessionFactory sessionFactory, Class<E> clazz) {
         this.sessionFactory = sessionFactory;
+        this.clazz = clazz;
     }
 
-    public E findById(ID id) {
+    public Optional<E> findById(ID id) {
         try(Session session = sessionFactory.openSession()) {
 
             session.beginTransaction();
-            E entity = session.find(clazz, id);
+            E entity = session.get(clazz, id);
             session.getTransaction().commit();
 
-            return entity;
-        } catch (HibernateException e) {
-            throw new RuntimeException("Error in findById");
+            return Optional.ofNullable(entity);
         }
     }
+
+//    public E create(E entity) {
+//        try (Session session = sessionFactory.openSession()) {
+//            session.beginTransaction();
+//            try {
+//                session.merge(entity);
+//                session.getTransaction().commit();
+//                return entity;
+//            } catch (OptimisticLockException e) {
+//                session.getTransaction().rollback();
+//                throw new RuntimeException("Error in create: OptimisticLockException", e);
+//            }
+//        } catch (HibernateException e) {
+//            throw new RuntimeException("Error in create", e);
+//        }
+//    }
+
 
     public E create(E entity) {
         try (Session session = sessionFactory.openSession()) {
 
             session.beginTransaction();
-            session.persist(entity);
+            E mergedEntity = session.merge(entity);
             session.getTransaction().commit();
 
-            return entity;
-        } catch (HibernateException e) {
-            throw new RuntimeException("Error in create");
+            return mergedEntity;
+        }
+    }
+
+    public void delete(E entity) {
+        try (Session session = sessionFactory.openSession()) {
+            session.beginTransaction();
+            session.remove(entity);
+            session.getTransaction().commit();
         }
     }
 }

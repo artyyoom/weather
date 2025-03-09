@@ -22,6 +22,7 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.art.weather.model.Session;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -45,7 +46,7 @@ public class SpringConfiguration implements WebMvcConfigurer {
     public SpringResourceTemplateResolver templateResolver() {
         SpringResourceTemplateResolver templateResolver = new SpringResourceTemplateResolver();
         templateResolver.setApplicationContext(applicationContext);
-        templateResolver.setPrefix("/");
+        templateResolver.setPrefix("classpath:/templates/");
         templateResolver.setSuffix(".html");
         logger.info("Template resolver configured.");
         return templateResolver;
@@ -73,8 +74,8 @@ public class SpringConfiguration implements WebMvcConfigurer {
         HikariDataSource dataSource = new HikariDataSource();
         dataSource.setDriverClassName("org.postgresql.Driver");
         dataSource.setJdbcUrl("jdbc:postgresql://localhost:5432/weather");
-        dataSource.setUsername("");
-        dataSource.setPassword("");
+        dataSource.setUsername("arttt");
+        dataSource.setPassword("arttt");
         dataSource.setMaximumPoolSize(10);
         logger.info("datasource configured.");
         return dataSource;
@@ -92,7 +93,7 @@ public class SpringConfiguration implements WebMvcConfigurer {
     public LocalSessionFactoryBean sessionFactory() {
         LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
         sessionFactory.setDataSource(dataSource());
-        sessionFactory.setPackagesToScan("ru.art.weather.model");
+        sessionFactory.setPackagesToScan("ru.art.weather");
 
         Properties hibernateProperties = new Properties();
         hibernateProperties.setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect");
@@ -111,4 +112,8 @@ public class SpringConfiguration implements WebMvcConfigurer {
         return transactionManager;
     }
 
+//    @Bean
+//    public Class<Session> sessionClass() {
+//        return Session.class;
+//    }
 }

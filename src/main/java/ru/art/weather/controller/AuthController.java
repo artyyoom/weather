@@ -1,18 +1,18 @@
 package ru.art.weather.controller;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
 import ru.art.weather.dto.RegistrationDto;
 import ru.art.weather.dto.UserLoginDto;
 import ru.art.weather.service.AuthService;
 import ru.art.weather.util.DataValidator;
+
+import java.util.Optional;
+import java.util.UUID;
 
 @Controller
 @RequiredArgsConstructor
@@ -20,21 +20,36 @@ public class AuthController {
     private final AuthService authService;
     private final DataValidator dataValidator;
 
-    @GetMapping("/login")
-    public String login(@RequestBody UserLoginDto userLoginDto, @CookieValue(value = "userId", required = false) String userId, HttpServletResponse response, Model model) {
-        authService.login(userLoginDto, userId, response);
-
-        model.addAttribute("userId", userId);
-        return "html/main-page";
+    @GetMapping("/")
+    public String index(Model model) {
+        UserLoginDto userLoginDto = new UserLoginDto();
+        model.addAttribute("userLoginDto", userLoginDto);
+        return "login";
     }
 
-    @GetMapping("/registration")
-    public String registration(@RequestBody RegistrationDto registrationDto, Model model) {
+    @PostMapping("/login")
+    public String login(@ModelAttribute UserLoginDto userLoginDto, @CookieValue(value = "sessionId", required = false) String sessionId, HttpServletResponse response, Model model) {
+        Optional<UUID> sessionUuid = authService.login(userLoginDto, sessionId);
+        if (sessionUuid.isPresent()) {
+            Cookie cookie = new Cookie("sessionId", sessionUuid.get().toString());
+            cookie.setMaxAge(60 * 60 * 7);
+            response.addCookie(cookie);
+            model.addAttribute("sessionId", sessionUuid.get());
+        }
+        else {
+            model.addAttribute("sessionId", sessionId);
+        }
+
+        return "main-page";
+    }
+
+    @PostMapping("/registration")
+    public String registration(@ModelAttribute RegistrationDto registrationDto, Model model) {
         dataValidator.validateName(registrationDto.getLogin());
         dataValidator.validatePasswords(registrationDto.getPassword(), registrationDto.getRePassword());
 
         authService.registration(registrationDto);
 
-        return "html/login";
+        return "login";
     }
 }

@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.UUID;
 
@@ -18,7 +19,7 @@ import java.util.UUID;
 public class Session {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne
@@ -26,5 +27,5 @@ public class Session {
     private User userId;
 
     @Column(name = "expiresAt")
-    private Date expiresAt;
+    private LocalDateTime expiresAt;
 }

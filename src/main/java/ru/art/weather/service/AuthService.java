@@ -1,10 +1,6 @@
 package ru.art.weather.service;
 
-import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.art.weather.dto.RegistrationDto;
 import ru.art.weather.dto.UserLoginDto;
@@ -15,8 +11,9 @@ import ru.art.weather.model.User;
 import ru.art.weather.repository.SessionRepository;
 import ru.art.weather.repository.UserRepository;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,25 +24,71 @@ public class AuthService {
     private final UserMapper userMapper;
     private final SessionMapper sessionMapper;
 
-    public void login(UserLoginDto userLoginDto, String userId, HttpServletResponse response) {
+    public Optional<UUID> login(UserLoginDto userLoginDto, String sessionId) {
 
-        Optional<User> userOptional = userRepository.findByName(userLoginDto.getLogin());
-        User user = userOptional.orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findByName(userLoginDto.getLogin())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (userId.isEmpty()) {
-            Session session = createSession(user);
-            Cookie cookie = new Cookie("userID", session.getId().toString());
-            response.addCookie(cookie);
+        if (sessionId != null) {
+            return checkSession(sessionId, user)
+                    .map(session -> Optional.ofNullable(session.getId()))
+                    .orElseGet(() -> Optional.ofNullable(createSession(user).getId()));
+        }
+        else {
+            Session session = getSessionByUser(user);
+            return Optional.ofNullable(session.getId());
         }
     }
 
+    public Optional<Session> checkSession(String sessionId, User user) {
+        try {
+            UUID sessionUuid = UUID.fromString(sessionId);
+            Optional<Session> sessionOptional = sessionRepository.findById(sessionUuid);
+
+            return sessionOptional.map(session -> {
+                LocalDateTime now = LocalDateTime.now();
+
+                if (now.isBefore(session.getExpiresAt())) {
+                    sessionRepository.delete(session);
+                    return Optional.of(createSession(user));
+                }
+
+                return Optional.of(session);
+
+            }).orElse(Optional.empty());
+
+//            if (sessionOptional.isPresent()) {
+//                Session session = sessionOptional.get();
+//                LocalDateTime now = LocalDateTime.now();
+//
+//                if (now.isBefore(session.getExpiresAt())) {
+//                    sessionRepository.delete(session);
+//                    Session createdSession = createSession(user);
+//                    return Optional.of(createdSession);
+//                }
+//
+//                return sessionOptional;
+//            } else {
+//                return Optional.empty();
+//            }
+        }
+        catch (IllegalArgumentException e) {
+            return Optional.empty();
+        }
+    }
+
+    private Session getSessionByUser(User user) {
+        return sessionRepository.findByUser(user)
+                .orElseGet(() -> createSession(user));
+    }
+
     private Session createSession(User user) {
+        LocalDateTime date = LocalDateTime.now().minusDays(7);
 
         Session session = Session.builder()
                 .userId(user)
-                .expiresAt(new Date())
+                .expiresAt(date)
                 .build();
-
         return sessionRepository.create(session);
     }
 
