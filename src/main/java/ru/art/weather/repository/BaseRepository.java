@@ -30,23 +30,6 @@ public abstract class BaseRepository<ID, E> {
         }
     }
 
-//    public E create(E entity) {
-//        try (Session session = sessionFactory.openSession()) {
-//            session.beginTransaction();
-//            try {
-//                session.merge(entity);
-//                session.getTransaction().commit();
-//                return entity;
-//            } catch (OptimisticLockException e) {
-//                session.getTransaction().rollback();
-//                throw new RuntimeException("Error in create: OptimisticLockException", e);
-//            }
-//        } catch (HibernateException e) {
-//            throw new RuntimeException("Error in create", e);
-//        }
-//    }
-
-
     public E create(E entity) {
         try (Session session = sessionFactory.openSession()) {
 

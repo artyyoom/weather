@@ -1,5 +1,6 @@
 package ru.art.weather.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zaxxer.hikari.HikariDataSource;
 import liquibase.integration.spring.SpringLiquibase;
 import org.hibernate.SessionFactory;
@@ -22,7 +23,6 @@ import org.thymeleaf.spring6.view.ThymeleafViewResolver;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import ru.art.weather.model.Session;
 
 import javax.sql.DataSource;
 import java.util.Properties;
@@ -112,8 +112,8 @@ public class SpringConfiguration implements WebMvcConfigurer {
         return transactionManager;
     }
 
-//    @Bean
-//    public Class<Session> sessionClass() {
-//        return Session.class;
-//    }
+    @Bean
+    public ObjectMapper objectMapper() {
+        return new ObjectMapper();
+    }
 }

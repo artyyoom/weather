@@ -27,7 +27,20 @@ public class AuthController {
         return "login";
     }
 
+    @GetMapping("/login")
+    public String redirectLogin() {
+        //TODO сделать переброс на main-page если есть cookie и отправить список городов
+        return "redirect:/";
+    }
+
+    @GetMapping("/registration")
+    public String redirectRegistration(Model model) {
+        model.addAttribute("registrationDto", new RegistrationDto());
+        return "registration";
+    }
+
     @PostMapping("/login")
+    //TODO возможно убрать model
     public String login(@ModelAttribute UserLoginDto userLoginDto, @CookieValue(value = "sessionId", required = false) String sessionId, HttpServletResponse response, Model model) {
         Optional<UUID> sessionUuid = authService.login(userLoginDto, sessionId);
         if (sessionUuid.isPresent()) {
@@ -35,21 +48,21 @@ public class AuthController {
             cookie.setMaxAge(60 * 60 * 7);
             response.addCookie(cookie);
             model.addAttribute("sessionId", sessionUuid.get());
-        }
-        else {
+        } else {
             model.addAttribute("sessionId", sessionId);
         }
 
         return "main-page";
     }
 
+    //TODO возможно переделать registration чтобы сам создавал session и cookie
     @PostMapping("/registration")
-    public String registration(@ModelAttribute RegistrationDto registrationDto, Model model) {
+    public String registration(@ModelAttribute RegistrationDto registrationDto) {
         dataValidator.validateName(registrationDto.getLogin());
         dataValidator.validatePasswords(registrationDto.getPassword(), registrationDto.getRePassword());
 
         authService.registration(registrationDto);
 
-        return "login";
+        return "redirect:/";
     }
 }

@@ -56,27 +56,13 @@ public class AuthService {
                 return Optional.of(session);
 
             }).orElse(Optional.empty());
-
-//            if (sessionOptional.isPresent()) {
-//                Session session = sessionOptional.get();
-//                LocalDateTime now = LocalDateTime.now();
-//
-//                if (now.isBefore(session.getExpiresAt())) {
-//                    sessionRepository.delete(session);
-//                    Session createdSession = createSession(user);
-//                    return Optional.of(createdSession);
-//                }
-//
-//                return sessionOptional;
-//            } else {
-//                return Optional.empty();
-//            }
         }
         catch (IllegalArgumentException e) {
             return Optional.empty();
         }
     }
 
+    //TODO сделать проверку на время сессии (checkSession разделить)
     private Session getSessionByUser(User user) {
         return sessionRepository.findByUser(user)
                 .orElseGet(() -> createSession(user));
@@ -93,6 +79,10 @@ public class AuthService {
     }
 
     public void registration(RegistrationDto registrationDto) {
+        userRepository.findByName(registrationDto.getLogin())
+                .ifPresent(existingUser -> {
+                    throw new RuntimeException("User already exists");
+                });
         userRepository.create(createUser(registrationDto));
     }
 
