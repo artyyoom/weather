@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.art.weather.dto.RegistrationDto;
 import ru.art.weather.dto.UserLoginDto;
-import ru.art.weather.mapper.SessionMapper;
 import ru.art.weather.mapper.UserMapper;
 import ru.art.weather.model.Session;
 import ru.art.weather.model.User;
@@ -22,7 +21,6 @@ public class AuthService {
     private final UserRepository userRepository;
     private final SessionRepository sessionRepository;
     private final UserMapper userMapper;
-    private final SessionMapper sessionMapper;
 
     public Optional<UUID> login(UserLoginDto userLoginDto, String sessionId) {
 

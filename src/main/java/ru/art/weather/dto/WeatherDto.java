@@ -13,7 +13,7 @@ import lombok.*;
 public class WeatherDto {
 
     @JsonProperty("name")
-    private String cityName;
+    private String name;
 
     private Sys sys;
 
@@ -23,16 +23,19 @@ public class WeatherDto {
     @JsonProperty("weather")
     private Weather[] weather;
 
+    @JsonProperty("coord")
+    private Coord coord;
+
     public String getCountry() {
         return sys != null ? sys.getCountry() : null;
     }
 
     public double getTemperature() {
-        return main != null ? main.getTemp() : 0.0;
+        return main != null ? main.getTemp() - 273.15 : 0.0;
     }
 
     public double getApparentTemperature() {
-        return main != null ? main.getFeelsLike() : 0.0;
+        return main != null ? main.getFeelsLike() - 273.15 : 0.0;
     }
 
     public String getDescription() {
@@ -42,10 +45,24 @@ public class WeatherDto {
         return null;
     }
 
+    public String getIcon() {
+        if (weather != null && weather.length > 0) {
+            return weather[0].getIcon();
+        }
+        return null;
+    }
+
     public int getHumidity() {
         return main != null ? main.getHumidity() : 0;
     }
 
+    public double getLongitude() {
+        return coord != null ? coord.getLongitude() : 0.0;
+    }
+
+    public double getLatitude() {
+        return coord != null ? coord.getLatitude() : 0.0;
+    }
 
     @Getter
     @Setter
@@ -78,7 +95,19 @@ public class WeatherDto {
     @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Weather {
-        @JsonProperty("description")
         private String description;
+        private String icon;
+    }
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Coord {
+        @JsonProperty("lon")
+        private double longitude;
+        @JsonProperty("lat")
+        private double latitude;
     }
 }

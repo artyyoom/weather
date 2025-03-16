@@ -9,7 +9,64 @@
 </head>
 <body>
 
-<p th:text="${sessionId}">id</p>
+<nav class="navbar navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+            <img src="images/weather-app.png" alt="" width="30" height="24" class="d-inline-block align-text-top">
+            Weather Tracker
+        </a>
+        <div class="d-flex align-items-center">
+            <span class="navbar-text me-3">zhukovsd</span>
+            <button class="btn btn-outline-danger">Sign out</button>
+        </div>
+    </div>
+</nav>
+
+<section id="page-content">
+    <div class="container mt-4">
+        <form th:action="@{/add-weather}" method="post">
+            <div class="d-flex my-4">
+                <div class="input-group location-search-input-group me-3">
+                    <input class="form-control" type="text" name="city" th:accept-charset="UTF-8" placeholder="Enter location" required>
+                    <button class="btn btn-outline-secondary btn-sm clear-input-button" type="button"
+                            onclick="this.previousElementSibling.value=''">
+                        &times;
+                    </button>
+                </div>
+                <button class="btn btn-outline-success">Search</button>
+            </div>
+        </form>
+
+        <div th:each="location : ${locations}">
+            <div class="row">
+                <div class="col-12 col-lg-3 col-md-6 mb-4">
+                    <div class="card h-100 position-relative weather-card">
+                        <div class="position-absolute weather-card-delete-form">
+                            <button class="btn-close" aria-label="Delete"></button>
+                        </div>
+                        <img class="card-img-top img-fluid"
+                             th:src="@{'https://openweathermap.org/img/wn/' + ${location.getIcon()} + '@4x.png'}"
+                             alt="Weather icon">
+                        <div class="card-body d-flex flex-column">
+                            <h1 class="card-text" th:text="${location.getTemperature()}">0°C</h1>
+                            <h3 class="card-title" th:text="${location.getName() + ', ' + location.getCountry()}">Tbilisi, GE</h3>
+                            <p class="card-text mb-1">Feels like <span th:text="${location.getApparentTemperature()}">2</span>°C.
+                                <span th:text="${location.getDescription()}">Clear sky</span>
+                            </p>
+                            <p class="card-text mb-1">Humidity: <span th:text="${location.getHumidity()}">70%</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="d-flex flex-wrap justify-content-between align-items-center py-3 mt-4 border-top">
+    <div class="px-4">
+        <span>© Weather Viewer, project from <a href="https://zhukovsd.github.io/java-backend-learning-course/">zhukovsd/java-backend-learning-course</a> roadmap.</span>
+    </div>
+</footer>
 
 </body>
 </html>

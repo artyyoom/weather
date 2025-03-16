@@ -40,7 +40,6 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    //TODO возможно убрать model
     public String login(@ModelAttribute UserLoginDto userLoginDto, @CookieValue(value = "sessionId", required = false) String sessionId, HttpServletResponse response, Model model) {
         Optional<UUID> sessionUuid = authService.login(userLoginDto, sessionId);
         if (sessionUuid.isPresent()) {
@@ -52,7 +51,7 @@ public class AuthController {
             model.addAttribute("sessionId", sessionId);
         }
 
-        return "main-page";
+        return "redirect:/main-page";
     }
 
     //TODO возможно переделать registration чтобы сам создавал session и cookie

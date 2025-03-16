@@ -26,4 +26,7 @@ public class UserRepository extends BaseRepository<Integer, User> {
             return Optional.empty();
         } // TODO добавить database exception
     }
+
+    //TODO
+//    public Optional<User> checkByNameAndPassword() {}
 }
