@@ -28,9 +28,8 @@ public class AuthService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (sessionId != null) {
-            return checkSession(sessionId, user)
-                    .map(session -> Optional.ofNullable(session.getId()))
-                    .orElseGet(() -> Optional.ofNullable(createSession(user).getId()));
+            return checkSession(sessionId, user).map(Session::getId)
+                    .or(() -> Optional.ofNullable(createSession(user).getId()));
         }
         else {
             Session session = getSessionByUser(user);

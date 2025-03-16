@@ -31,11 +31,11 @@ public class WeatherDto {
     }
 
     public double getTemperature() {
-        return main != null ? main.getTemp() - 273.15 : 0.0;
+        return main != null ? Math.round((main.getTemp() - 273.15) * 100.0) / 100.0 : 0.0;
     }
 
     public double getApparentTemperature() {
-        return main != null ? main.getFeelsLike() - 273.15 : 0.0;
+        return main != null ? Math.round((main.getFeelsLike() - 273.15) * 100.0) / 100.0 : 0.0;
     }
 
     public String getDescription() {

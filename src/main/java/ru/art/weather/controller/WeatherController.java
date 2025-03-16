@@ -28,11 +28,13 @@ public class WeatherController {
     }
 
     @PostMapping("add-weather")
-    public String addWeather(@CookieValue(value = "sessionId", required = false) String sessionId,@RequestParam(name = "city") String city) {
+    public String addWeather(@CookieValue(value = "sessionId", required = false) String sessionId, @RequestParam(name = "city") String city) {
         User user = userService.getUserBySessionId(sessionId);
 
         weatherService.addWeather(user, city);
 
         return"redirect:/main-page";
     }
+
+
 }

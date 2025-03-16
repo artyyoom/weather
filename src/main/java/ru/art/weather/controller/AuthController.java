@@ -1,6 +1,7 @@
 package ru.art.weather.controller;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,7 @@ public class AuthController {
 
     @GetMapping("/login")
     public String redirectLogin() {
-        //TODO сделать переброс на main-page если есть cookie и отправить список городов
+        //TODO сделать переброс на main-page если есть cookie
         return "redirect:/";
     }
 
@@ -54,7 +55,6 @@ public class AuthController {
         return "redirect:/main-page";
     }
 
-    //TODO возможно переделать registration чтобы сам создавал session и cookie
     @PostMapping("/registration")
     public String registration(@ModelAttribute RegistrationDto registrationDto) {
         dataValidator.validateName(registrationDto.getLogin());
@@ -62,6 +62,14 @@ public class AuthController {
 
         authService.registration(registrationDto);
 
+        return "redirect:/";
+    }
+
+    @GetMapping("/sign-out")
+    public String signOut(HttpServletResponse response) {
+        Cookie cookie = new Cookie("sessionId", "");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
         return "redirect:/";
     }
 }

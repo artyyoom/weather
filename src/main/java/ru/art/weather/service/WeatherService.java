@@ -53,6 +53,7 @@ public class WeatherService {
     }
 
     //TODO проверить на правильность города
+    //TODO разделить на методы
     public void addWeather(User user, String paramCity) {
         try {
             String decodedCity = StringEscapeUtils.unescapeHtml4(paramCity);
