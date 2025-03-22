@@ -4,18 +4,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
+import ru.art.weather.dto.LocationDto;
 import ru.art.weather.dto.WeatherDto;
+import ru.art.weather.dto.WeatherResponseDto;
+import ru.art.weather.exception.DataNotFoundException;
 import ru.art.weather.mapper.LocationMapper;
 import ru.art.weather.model.Location;
 import ru.art.weather.model.User;
 import ru.art.weather.repository.LocationRepository;
 
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -52,14 +53,11 @@ public class WeatherService {
         }
     }
 
-    //TODO проверить на правильность города
-    //TODO разделить на методы
-    public void addWeather(User user, String paramCity) {
+    public List<WeatherDto> getWeatherByCity(String city) {
         try {
-            String decodedCity = StringEscapeUtils.unescapeHtml4(paramCity);
-            String city = URLEncoder.encode(decodedCity, StandardCharsets.UTF_8);
+            String decodedCity = StringEscapeUtils.unescapeHtml4(city);
 
-            String url = String.format("https://api.openweathermap.org/data/2.5/weather?q=%s&appid=6ca196c0d8b8abaee4e00a273b662353", city);
+            String url = String.format("https://api.openweathermap.org/data/2.5/find?q=%s&appid=6ca196c0d8b8abaee4e00a273b662353", decodedCity);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(url))
                     .GET()
@@ -67,17 +65,30 @@ public class WeatherService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            WeatherDto weatherDto = objectMapper.readValue(response.body(), WeatherDto.class);
-            createLocation(weatherDto, user);
+            WeatherResponseDto weatherDto = objectMapper.readValue(response.body(), WeatherResponseDto.class);
+            System.out.println(weatherDto.getWeather().size());
+            return weatherDto.getWeather();
+
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new DataNotFoundException(e.getMessage());
+        }
+    }
+
+    public void addWeather(LocationDto location, User user) {
+        try {
+            createLocation(location, user);
+        } catch (Exception e) {
+            throw new DataNotFoundException("Weather not found");
         }
     }
 
     //TODO
-    public void deleteWeather(User user, String paramCity) {}
+    public void deleteWeather(User user, String paramCity) {
+        locationRepository.deleteByUserAndCity(user, paramCity);
+    }
 
-    private void createLocation(WeatherDto weatherDto, User user) {
-        locationRepository.create(locationMapper.toLocation(weatherDto, user));
+    private void createLocation(LocationDto locationDto, User user) {
+        locationRepository.getByUserAndCity(user, locationDto.getName())
+                .orElseGet(() -> locationRepository.create(locationMapper.toLocation(locationDto, user)));
     }
 }

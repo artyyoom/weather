@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.art.weather.dto.RegistrationDto;
 import ru.art.weather.dto.UserLoginDto;
+import ru.art.weather.exception.DataAlreadyExistsException;
+import ru.art.weather.exception.DataNotFoundException;
 import ru.art.weather.mapper.UserMapper;
 import ru.art.weather.model.Session;
 import ru.art.weather.model.User;
@@ -19,20 +21,20 @@ import java.util.UUID;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final UserService userService;
     private final SessionRepository sessionRepository;
     private final UserMapper userMapper;
 
     public Optional<UUID> login(UserLoginDto userLoginDto, String sessionId) {
 
         User user = userRepository.findByName(userLoginDto.getLogin())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new DataNotFoundException("User not found"));
 
         if (sessionId != null) {
             return checkSession(sessionId, user).map(Session::getId)
                     .or(() -> Optional.ofNullable(createSession(user).getId()));
-        }
-        else {
-            Session session = getSessionByUser(user);
+        } else {
+            Session session = getSessionByUser(user).orElseGet(() -> createSession(user));
             return Optional.ofNullable(session.getId());
         }
     }
@@ -47,22 +49,19 @@ public class AuthService {
 
                 if (now.isBefore(session.getExpiresAt())) {
                     sessionRepository.delete(session);
-                    return Optional.of(createSession(user));
+                    return Optional.ofNullable(createSession(user));
                 }
 
                 return Optional.of(session);
 
             }).orElse(Optional.empty());
-        }
-        catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
     }
 
-    //TODO сделать проверку на время сессии (checkSession разделить)
-    private Session getSessionByUser(User user) {
-        return sessionRepository.findByUser(user)
-                .orElseGet(() -> createSession(user));
+    private Optional<Session> getSessionByUser(User user) {
+        return sessionRepository.findByUser(user);
     }
 
     private Session createSession(User user) {
@@ -78,12 +77,18 @@ public class AuthService {
     public void registration(RegistrationDto registrationDto) {
         userRepository.findByName(registrationDto.getLogin())
                 .ifPresent(existingUser -> {
-                    throw new RuntimeException("User already exists");
+                    throw new DataAlreadyExistsException("User already exists");
                 });
         userRepository.create(createUser(registrationDto));
     }
 
     private User createUser(RegistrationDto registrationDto) {
         return userMapper.toEntity(registrationDto);
+    }
+
+    public boolean isUserMatchCookie(UserLoginDto userLoginDto, String sessionId) {
+        Optional<User> user = userService.getUserBySessionId(sessionId);
+
+        return user.filter(value -> userLoginDto.getLogin().equals(value.getLogin())).isPresent();
     }
 }

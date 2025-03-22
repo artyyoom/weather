@@ -15,6 +15,7 @@ import org.springframework.orm.hibernate5.LocalSessionFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.thymeleaf.spring6.SpringTemplateEngine;
@@ -51,6 +52,12 @@ public class SpringConfiguration implements WebMvcConfigurer {
         templateResolver.setSuffix(".html");
         logger.info("Template resolver configured.");
         return templateResolver;
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler("/images/**").addResourceLocations("/webapp/images/");
+        registry.addResourceHandler("/css/**").addResourceLocations("/webapp/css/");
     }
 
     @Bean

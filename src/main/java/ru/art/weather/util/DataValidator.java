@@ -1,6 +1,8 @@
 package ru.art.weather.util;
 
 import org.springframework.stereotype.Component;
+import ru.art.weather.exception.DataBaseException;
+import ru.art.weather.exception.IncorrectDataException;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,13 +15,13 @@ public class DataValidator {
 
         Matcher matcher = Pattern.compile(regex).matcher(name);
         if (!matcher.matches()) {
-            throw new RuntimeException("Login incorrect");
+            throw new IncorrectDataException("Login incorrect");
         }
     }
 
     public void validatePasswords(String password , String rePassword) {
         if (!password.equals(rePassword)) {
-            throw new RuntimeException("Passwords do not match");
+            throw new IncorrectDataException("Passwords do not match");
         }
         validatePassword(password);
     }
@@ -29,7 +31,7 @@ public class DataValidator {
 
         Matcher matcher = Pattern.compile(regex).matcher(password);
         if (!matcher.matches()) {
-            throw new RuntimeException("Password incorrect");
+            throw new IncorrectDataException("Password incorrect");
         }
     }
 }

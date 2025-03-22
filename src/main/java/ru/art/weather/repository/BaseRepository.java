@@ -5,6 +5,7 @@ import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
+import ru.art.weather.exception.DataBaseException;
 
 import java.util.Optional;
 
@@ -27,6 +28,8 @@ public abstract class BaseRepository<ID, E> {
             session.getTransaction().commit();
 
             return Optional.ofNullable(entity);
+        } catch (Exception e) {
+            throw new DataBaseException(e.getMessage());
         }
     }
 
@@ -38,6 +41,8 @@ public abstract class BaseRepository<ID, E> {
             session.getTransaction().commit();
 
             return mergedEntity;
+        } catch (Exception e) {
+            throw new DataBaseException(e.getMessage());
         }
     }
 
@@ -46,6 +51,8 @@ public abstract class BaseRepository<ID, E> {
             session.beginTransaction();
             session.remove(entity);
             session.getTransaction().commit();
+        } catch (Exception e) {
+            throw new DataBaseException(e.getMessage());
         }
     }
 }

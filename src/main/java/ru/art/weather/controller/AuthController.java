@@ -1,7 +1,6 @@
 package ru.art.weather.controller;
 
 import jakarta.servlet.http.Cookie;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -9,7 +8,10 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.art.weather.dto.RegistrationDto;
 import ru.art.weather.dto.UserLoginDto;
+import ru.art.weather.model.Session;
+import ru.art.weather.repository.SessionRepository;
 import ru.art.weather.service.AuthService;
+import ru.art.weather.service.UserService;
 import ru.art.weather.util.DataValidator;
 
 import java.util.Optional;
@@ -19,19 +21,24 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final UserService userService;
+    private final SessionRepository sessionRepository;
     private final DataValidator dataValidator;
 
     @GetMapping("/")
     public String index(Model model) {
-        UserLoginDto userLoginDto = new UserLoginDto();
-        model.addAttribute("userLoginDto", userLoginDto);
-        return "login";
+        return "redirect:/login";
     }
 
     @GetMapping("/login")
-    public String redirectLogin() {
-        //TODO сделать переброс на main-page если есть cookie
-        return "redirect:/";
+    public String redirectLogin(@CookieValue(value = "sessionId", required = false) String sessionId, Model model) {
+
+        if (sessionId != null) {
+            return "redirect:/main-page";
+        } else {
+            model.addAttribute("userLoginDto", new UserLoginDto());
+            return "login";
+        }
     }
 
     @GetMapping("/registration")
@@ -42,14 +49,19 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(@ModelAttribute UserLoginDto userLoginDto, @CookieValue(value = "sessionId", required = false) String sessionId, HttpServletResponse response, Model model) {
+
+        //TODO убрать это
+        if (sessionId != null && !authService.isUserMatchCookie(userLoginDto, sessionId)) {
+            Optional<Session> byUser = sessionRepository.findByUser(userService.getUserByName(userLoginDto.getLogin()));
+            sessionId = byUser.map(session -> session.getId().toString()).orElse(null);
+        }
+
         Optional<UUID> sessionUuid = authService.login(userLoginDto, sessionId);
+
         if (sessionUuid.isPresent()) {
             Cookie cookie = new Cookie("sessionId", sessionUuid.get().toString());
-            cookie.setMaxAge(60 * 60 * 7);
             response.addCookie(cookie);
             model.addAttribute("sessionId", sessionUuid.get());
-        } else {
-            model.addAttribute("sessionId", sessionId);
         }
 
         return "redirect:/main-page";
