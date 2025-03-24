@@ -41,7 +41,7 @@ public class WeatherController {
     }
 
     @PostMapping("add-weather")
-    public String addWeather(@CookieValue(value = "sessionId", required = false) String sessionId,@ModelAttribute LocationDto locationDto) {
+    public String addWeather(@CookieValue(value = "sessionId", required = false) String sessionId, @ModelAttribute LocationDto locationDto) {
         User user = userService.getUserBySessionId(sessionId).orElseThrow(RuntimeException::new);
 
         weatherService.addWeather(locationDto, user);
@@ -50,8 +50,8 @@ public class WeatherController {
     }
 
     @GetMapping("delete-weather")
-    public String deleteWeather(@CookieValue(value = "sessionId", required = false) String sessionId, @RequestParam(name = "city") String city) {
-        weatherService.deleteWeather(userService.getUserBySessionId(sessionId).orElseThrow(RuntimeException::new), city);
+    public String deleteWeather(@CookieValue(value = "sessionId", required = false) String sessionId, @ModelAttribute LocationDto locationDto) {
+        weatherService.deleteWeather(userService.getUserBySessionId(sessionId).orElseThrow(RuntimeException::new), locationDto);
         return "redirect:/main-page";
     }
 }

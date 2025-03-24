@@ -83,12 +83,12 @@ public class WeatherService {
     }
 
     //TODO
-    public void deleteWeather(User user, String paramCity) {
-        locationRepository.deleteByUserAndCity(user, paramCity);
+    public void deleteWeather(User user, LocationDto locationDto) {
+        locationRepository.deleteByUserAndCity(user, locationDto);
     }
 
     private void createLocation(LocationDto locationDto, User user) {
-        locationRepository.getByUserAndCity(user, locationDto.getName())
+        locationRepository.getByUserAndLocation(user, locationDto)
                 .orElseGet(() -> locationRepository.create(locationMapper.toLocation(locationDto, user)));
     }
 }

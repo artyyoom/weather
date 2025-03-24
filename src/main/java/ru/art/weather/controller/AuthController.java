@@ -33,12 +33,8 @@ public class AuthController {
     @GetMapping("/login")
     public String redirectLogin(@CookieValue(value = "sessionId", required = false) String sessionId, Model model) {
 
-        if (sessionId != null) {
-            return "redirect:/main-page";
-        } else {
-            model.addAttribute("userLoginDto", new UserLoginDto());
-            return "login";
-        }
+        model.addAttribute("userLoginDto", new UserLoginDto());
+        return "login";
     }
 
     @GetMapping("/registration")

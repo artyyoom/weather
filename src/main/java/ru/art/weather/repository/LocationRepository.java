@@ -4,6 +4,7 @@ import jakarta.persistence.NoResultException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.springframework.stereotype.Repository;
+import ru.art.weather.dto.LocationDto;
 import ru.art.weather.exception.DataBaseException;
 import ru.art.weather.model.Location;
 import ru.art.weather.model.User;
@@ -34,12 +35,18 @@ public class LocationRepository extends BaseRepository<Integer, Location> {
     }
 
     //TODO
-    public void deleteByUserAndCity(User user, String paramCity) {
+    public void deleteByUserAndCity(User user, LocationDto locationDto) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
-            session.createQuery("DELETE FROM Location WHERE userId = :userId AND name = :city")
+            session.createQuery("""
+                                    DELETE FROM Location WHERE userId = :userId
+                                    AND name = :name
+                                    AND latitude = :latitude
+                                    AND longitude = :longitude""")
                     .setParameter("userId", user)
-                    .setParameter("city", paramCity)
+                    .setParameter("name", locationDto.getName())
+                    .setParameter("latitude", locationDto.getLatitude())
+                    .setParameter("longitude", locationDto.getLongitude())
                     .executeUpdate();
             session.getTransaction().commit();
         } catch (NoResultException ignored) {
@@ -48,12 +55,20 @@ public class LocationRepository extends BaseRepository<Integer, Location> {
         }
     }
 
-    public Optional<Location> getByUserAndCity(User user, String city) {
+    public Optional<Location> getByUserAndLocation(User user, LocationDto locationDto) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
-            Location location = session.createQuery("FROM Location WHERE userId = :userId AND name = :name", Location.class)
+            Location location = session.createQuery(
+                            """
+                                    FROM Location WHERE userId = :userId
+                                            AND name = :name
+                                            AND latitude = :latitude
+                                            AND longitude = :longitude""",
+                            Location.class)
                     .setParameter("userId", user)
-                    .setParameter("name", city)
+                    .setParameter("name", locationDto.getName())
+                    .setParameter("latitude", locationDto.getLatitude())
+                    .setParameter("longitude", locationDto.getLongitude())
                     .getSingleResult();
             session.getTransaction().commit();
             return Optional.of(location);
