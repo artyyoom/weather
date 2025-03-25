@@ -1,11 +1,13 @@
 package ru.art.weather.service;
 
 import lombok.RequiredArgsConstructor;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import ru.art.weather.dto.RegistrationDto;
 import ru.art.weather.dto.UserLoginDto;
 import ru.art.weather.exception.DataAlreadyExistsException;
 import ru.art.weather.exception.DataNotFoundException;
+import ru.art.weather.exception.IncorrectDataException;
 import ru.art.weather.mapper.UserMapper;
 import ru.art.weather.model.Session;
 import ru.art.weather.model.User;
@@ -37,6 +39,18 @@ public class AuthService {
             Session session = getSessionByUser(user).orElseGet(() -> createSession(user));
             return Optional.ofNullable(session.getId());
         }
+    }
+
+    public void checkPassword(User user, String password) {
+        String userPassword = user.getPassword();
+
+        if (!BCrypt.checkpw(password, userPassword)) {
+            throw new IncorrectDataException("Incorrect password");
+        }
+    }
+
+    private String encodePassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
     }
 
     public Optional<Session> checkSession(String sessionId, User user) {
@@ -79,11 +93,13 @@ public class AuthService {
                 .ifPresent(existingUser -> {
                     throw new DataAlreadyExistsException("User already exists");
                 });
-        userRepository.create(createUser(registrationDto));
+        createUser(registrationDto);
     }
 
-    private User createUser(RegistrationDto registrationDto) {
-        return userMapper.toEntity(registrationDto);
+    private void createUser(RegistrationDto registrationDto) {
+        registrationDto.setPassword(encodePassword(registrationDto.getPassword()));
+        User entity = userMapper.toEntity(registrationDto);
+        userRepository.create(entity);
     }
 
     public boolean isUserMatchCookie(UserLoginDto userLoginDto, String sessionId) {

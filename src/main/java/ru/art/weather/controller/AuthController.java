@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.art.weather.dto.RegistrationDto;
 import ru.art.weather.dto.UserLoginDto;
 import ru.art.weather.model.Session;
+import ru.art.weather.model.User;
 import ru.art.weather.repository.SessionRepository;
 import ru.art.weather.service.AuthService;
 import ru.art.weather.service.UserService;
@@ -46,7 +47,10 @@ public class AuthController {
     @PostMapping("/login")
     public String login(@ModelAttribute UserLoginDto userLoginDto, @CookieValue(value = "sessionId", required = false) String sessionId, HttpServletResponse response, Model model) {
 
-        //TODO убрать это
+        User user = userService.getUserByName(userLoginDto.getLogin());
+        authService.checkPassword(user, userLoginDto.getPassword());
+
+
         if (sessionId != null && !authService.isUserMatchCookie(userLoginDto, sessionId)) {
             Optional<Session> byUser = sessionRepository.findByUser(userService.getUserByName(userLoginDto.getLogin()));
             sessionId = byUser.map(session -> session.getId().toString()).orElse(null);
