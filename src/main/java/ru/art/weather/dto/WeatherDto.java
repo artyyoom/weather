@@ -12,102 +12,60 @@ import lombok.*;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class WeatherDto {
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("location")
+    private Location location;
 
-    private Sys sys;
+    @JsonProperty("current")
+    private Current current;
 
-    @JsonProperty("main")
-    private Main main;
-
-    @JsonProperty("weather")
-    private Weather[] weather;
-
-    @JsonProperty("coord")
-    private Coord coord;
-
-    public String getCountry() {
-        return sys != null ? sys.getCountry() : null;
-    }
-
-    public double getTemperature() {
-        return main != null ? Math.round((main.getTemp() - 273.15) * 100.0) / 100.0 : 0.0;
-    }
-
-    public double getApparentTemperature() {
-        return main != null ? Math.round((main.getFeelsLike() - 273.15) * 100.0) / 100.0 : 0.0;
-    }
-
-    public String getDescription() {
-        if (weather != null && weather.length > 0) {
-            return weather[0].getDescription();
-        }
-        return null;
-    }
-
-    public String getIcon() {
-        if (weather != null && weather.length > 0) {
-            return weather[0].getIcon();
-        }
-        return null;
-    }
-
-    public int getHumidity() {
-        return main != null ? main.getHumidity() : 0;
-    }
-
-    public double getLongitude() {
-        return coord != null ? coord.getLongitude() : 0.0;
-    }
-
-    public double getLatitude() {
-        return coord != null ? coord.getLatitude() : 0.0;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
+    @Data
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Sys {
+    public static class Location {
+        @JsonProperty("name")
+        private String name;
+
+        @JsonProperty("region")
+        private String region;
+
         @JsonProperty("country")
         private String country;
-    }
 
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Main {
-        @JsonProperty("temp")
-        private double temp;
-
-        @JsonProperty("feels_like")
-        private double feelsLike;
-
-        private int humidity;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Weather {
-        private String description;
-        private String icon;
-    }
-
-    @Getter
-    @Setter
-    @AllArgsConstructor
-    @NoArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Coord {
-        @JsonProperty("lon")
-        private double longitude;
         @JsonProperty("lat")
         private double latitude;
+
+        @JsonProperty("lon")
+        private double longitude;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Current {
+        @JsonProperty("temp_c")
+        private double temperatureCelsius;
+
+        @JsonProperty("condition")
+        private Condition condition;
+
+        @JsonProperty("wind_kph")
+        private double windSpeedKph;
+
+        @JsonProperty("humidity")
+        private int humidity;
+
+        @JsonProperty("cloud")
+        private int cloudCover;
+
+        @JsonProperty("feelslike_c")
+        private double feelsLikeCelsius;
+    }
+
+    @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class Condition {
+        @JsonProperty("text")
+        private String description;
+
+        @JsonProperty("icon")
+        private String iconUrl;
     }
 }

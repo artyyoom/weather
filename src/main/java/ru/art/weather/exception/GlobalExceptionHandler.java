@@ -59,9 +59,10 @@ public class GlobalExceptionHandler {
             //tODO
         } else if (referer != null && referer.contains("/main-page")) {
             model.addAttribute("errorMessage", e.getMessage());
+            return "redirect:/main-page";
 
         } else if (referer != null && referer.contains("/search-results")) {
-            return "redirect:/login";
+            return "redirect:/main-page";
         }
 
         return "error-page";

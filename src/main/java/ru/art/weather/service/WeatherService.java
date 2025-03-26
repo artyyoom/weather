@@ -6,7 +6,6 @@ import org.apache.commons.text.StringEscapeUtils;
 import org.springframework.stereotype.Service;
 import ru.art.weather.dto.LocationDto;
 import ru.art.weather.dto.WeatherDto;
-import ru.art.weather.dto.WeatherResponseDto;
 import ru.art.weather.exception.DataNotFoundException;
 import ru.art.weather.mapper.LocationMapper;
 import ru.art.weather.model.Location;
@@ -40,7 +39,7 @@ public class WeatherService {
 
     private WeatherDto getWeatherByLocation(Location location) {
         try {
-            String url = String.format("https://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&appid=6ca196c0d8b8abaee4e00a273b662353",
+            String url = String.format("https://api.weatherapi.com/v1/current.json?key=da96ad96c28748c2aaf140646252603&q=%s,%s&aqi=no",
                     location.getLatitude(), location.getLongitude());
 
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
@@ -53,11 +52,11 @@ public class WeatherService {
         }
     }
 
-    public List<WeatherDto> getWeatherByCity(String city) {
+    public List<LocationDto> getWeatherByCity(String city) {
         try {
-            String decodedCity = StringEscapeUtils.unescapeHtml4(city);
+//            String decodedCity = StringEscapeUtils.unescapeHtml4(city);
 
-            String url = String.format("https://api.openweathermap.org/data/2.5/find?q=%s&appid=6ca196c0d8b8abaee4e00a273b662353", decodedCity);
+            String url = String.format("https://api.weatherapi.com/v1/search.json?key=da96ad96c28748c2aaf140646252603&q=%s&aqi=no", city);
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(url))
                     .GET()
@@ -65,9 +64,13 @@ public class WeatherService {
 
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            WeatherResponseDto weatherDto = objectMapper.readValue(response.body(), WeatherResponseDto.class);
-            System.out.println(weatherDto.getWeather().size());
-            return weatherDto.getWeather();
+            List<LocationDto> locations = objectMapper.readValue(response.body(), objectMapper.getTypeFactory().constructCollectionType(List.class, LocationDto.class));
+
+            if (locations.isEmpty()) {
+                throw new Exception("Location not found");
+            }
+
+            return locations;
 
         } catch (Exception e) {
             throw new DataNotFoundException(e.getMessage());
@@ -84,7 +87,7 @@ public class WeatherService {
 
     //TODO
     public void deleteWeather(User user, LocationDto locationDto) {
-        locationRepository.deleteByUserAndCity(user, locationDto);
+        locationRepository.deleteByUserAndLocation(user, locationDto);
     }
 
     private void createLocation(LocationDto locationDto, User user) {

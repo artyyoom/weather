@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.art.weather.dto.LocationDto;
 import ru.art.weather.dto.WeatherDto;
+import ru.art.weather.exception.DataNotFoundException;
 import ru.art.weather.model.User;
 import ru.art.weather.service.UserService;
 import ru.art.weather.service.WeatherService;
@@ -20,9 +21,15 @@ public class WeatherController {
 
     @GetMapping("main-page")
     public String mainPage(@CookieValue(value = "sessionId", required = false) String sessionId, Model model) {
-        User user = userService.getUserBySessionId(sessionId).orElseThrow(RuntimeException::new);
+
+        if (sessionId == null) {
+            return "main-page";
+        }
+
+        User user = userService.getUserBySessionId(sessionId).orElseThrow(() -> new DataNotFoundException("User not found"));
 
         List<WeatherDto> locations = weatherService.getLocations(user);
+
         model.addAttribute("locations", locations);
         model.addAttribute("userName", user.getLogin());
 
@@ -35,7 +42,7 @@ public class WeatherController {
             return "redirect:/login";
         }
 
-        List<WeatherDto> locations = weatherService.getWeatherByCity(city);
+        List<LocationDto> locations = weatherService.getWeatherByCity(city);
         model.addAttribute("locations", locations);
         return "search-results";
     }

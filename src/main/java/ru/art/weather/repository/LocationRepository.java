@@ -34,19 +34,16 @@ public class LocationRepository extends BaseRepository<Integer, Location> {
         }
     }
 
-    //TODO
-    public void deleteByUserAndCity(User user, LocationDto locationDto) {
+    public void deleteByUserAndLocation(User user, LocationDto locationDto) {
         try (Session session = sessionFactory.openSession()) {
             session.beginTransaction();
             session.createQuery("""
-                                    DELETE FROM Location WHERE userId = :userId
-                                    AND name = :name
-                                    AND latitude = :latitude
-                                    AND longitude = :longitude""")
+                            DELETE FROM Location WHERE userId = :userId
+                            AND latitude = :latitude
+                            AND longitude = :longitude""")
                     .setParameter("userId", user)
-                    .setParameter("name", locationDto.getName())
-                    .setParameter("latitude", locationDto.getLatitude())
-                    .setParameter("longitude", locationDto.getLongitude())
+                    .setParameter("latitude", Math.round(locationDto.getLatitude() * 100.0) / 100.0)
+                    .setParameter("longitude", Math.round(locationDto.getLongitude() * 100.0) / 100.0)
                     .executeUpdate();
             session.getTransaction().commit();
         } catch (NoResultException ignored) {
@@ -61,12 +58,10 @@ public class LocationRepository extends BaseRepository<Integer, Location> {
             Location location = session.createQuery(
                             """
                                     FROM Location WHERE userId = :userId
-                                            AND name = :name
                                             AND latitude = :latitude
                                             AND longitude = :longitude""",
                             Location.class)
                     .setParameter("userId", user)
-                    .setParameter("name", locationDto.getName())
                     .setParameter("latitude", locationDto.getLatitude())
                     .setParameter("longitude", locationDto.getLongitude())
                     .getSingleResult();

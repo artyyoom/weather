@@ -1,5 +1,7 @@
 package ru.art.weather.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 
 @Getter
@@ -7,9 +9,16 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class LocationDto {
 
     private String name;
-    private double longitude;
+
+    @JsonProperty("lat")
     private double latitude;
+
+    @JsonProperty("lon")
+    private double longitude;
+
+    private String country;
 }
