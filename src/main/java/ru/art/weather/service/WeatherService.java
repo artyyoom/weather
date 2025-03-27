@@ -45,7 +45,11 @@ public class WeatherService {
             HttpRequest request = HttpRequest.newBuilder().uri(URI.create(url)).GET().build();
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            return objectMapper.readValue(response.body(), WeatherDto.class);
+            WeatherDto weatherDto = objectMapper.readValue(response.body(), WeatherDto.class);
+            weatherDto.getLocation().setLatitude(location.getLatitude());
+            weatherDto.getLocation().setLongitude(location.getLongitude());
+
+            return weatherDto;
 
         } catch (Exception e) {
             throw new RuntimeException(e);

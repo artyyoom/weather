@@ -42,8 +42,8 @@ public class LocationRepository extends BaseRepository<Integer, Location> {
                             AND latitude = :latitude
                             AND longitude = :longitude""")
                     .setParameter("userId", user)
-                    .setParameter("latitude", Math.round(locationDto.getLatitude() * 100.0) / 100.0)
-                    .setParameter("longitude", Math.round(locationDto.getLongitude() * 100.0) / 100.0)
+                    .setParameter("latitude", locationDto.getLatitude())
+                    .setParameter("longitude", locationDto.getLongitude())
                     .executeUpdate();
             session.getTransaction().commit();
         } catch (NoResultException ignored) {
