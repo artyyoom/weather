@@ -41,18 +41,6 @@ public class AuthService {
         }
     }
 
-    public void checkPassword(User user, String password) {
-        String userPassword = user.getPassword();
-
-        if (!BCrypt.checkpw(password, userPassword)) {
-            throw new IncorrectDataException("Incorrect password");
-        }
-    }
-
-    private String encodePassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt());
-    }
-
     public Optional<Session> checkSession(String sessionId, User user) {
         try {
             UUID sessionUuid = UUID.fromString(sessionId);
@@ -61,9 +49,9 @@ public class AuthService {
             return sessionOptional.map(session -> {
                 LocalDateTime now = LocalDateTime.now();
 
-                if (now.isBefore(session.getExpiresAt())) {
+                if (now.isAfter(session.getExpiresAt())) {
                     sessionRepository.delete(session);
-                    return Optional.ofNullable(createSession(user));
+                    return Optional.of(createSession(user));
                 }
 
                 return Optional.of(session);
@@ -100,6 +88,18 @@ public class AuthService {
         registrationDto.setPassword(encodePassword(registrationDto.getPassword()));
         User entity = userMapper.toEntity(registrationDto);
         userRepository.create(entity);
+    }
+
+    private String encodePassword(String password) {
+        return BCrypt.hashpw(password, BCrypt.gensalt());
+    }
+
+    public void checkPassword(User user, String password) {
+        String userPassword = user.getPassword();
+
+        if (!BCrypt.checkpw(password, userPassword)) {
+            throw new IncorrectDataException("Incorrect password");
+        }
     }
 
     public boolean isUserMatchCookie(UserLoginDto userLoginDto, String sessionId) {
